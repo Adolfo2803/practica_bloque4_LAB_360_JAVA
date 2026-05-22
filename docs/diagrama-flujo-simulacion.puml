@@ -1,0 +1,87 @@
+@startuml Flujo de Simulacion - Parque Turistico de Dinosaurios
+
+start
+
+:ParkConfig.getInstance();
+note right: Singleton\nCarga park.properties
+
+:Crear entidades desde configuracion;
+note right
+  - 50 turistas
+  - 20 dinosaurios (5 carnivoros + 15 herbivoros)
+  - 4 vehiculos de mantenimiento
+  - 3 guardias + 2 tecnicos
+  - 5 zonas del parque
+  - 5 eventos con probabilidad
+  - DatabaseService (H2 + Liquibase)
+end note
+
+:Agregar todos los turistas\na la cola de ArrivalZone;
+
+while (step < totalSteps?) is (si)
+
+  :state.clearActiveEvents();
+  note right: Limpia eventos activos\ny descuento del step anterior
+
+  :== A. LLEGADAS ==
+  arrivalZone.processBatch(batchSize, db);
+  note right: Vende boletos\nTurista -> IN_PARK\nRegistra ingreso en DB
+
+  :== B. MOVIMIENTO ==;
+  while (turista IN_PARK?) is (siguiente)
+    if (random < 0.4?) then (si)
+      :centralHub.visit();
+      note right: Prob. compra souvenir
+    elseif (random < 0.6?) then (si)
+      :bathroomZone.tryEnter();
+      note right: Prob. compra SPA
+    else (no)
+      :enclosure.visit();
+      note right: Cobra entrada\nRealiza encuesta
+    endif
+  endwhile (no mas)
+
+  :== C. TICKS ZONAS ==
+  bathroomZone.tick()
+  powerPlant.tick(rng, db)
+  vehicles.forEach(tick());
+  note right: Libera slots de bano\nConsume energia\nRepara vehiculos rotos
+
+  :== D. EVENTOS ==;
+  while (evento en allEvents?) is (siguiente)
+    if (rng.nextDouble() < probabilidad?) then (ocurre)
+      :event.execute(state, rng);
+      :state.addActiveEvent(nombre);
+    else (no ocurre)
+    endif
+  endwhile (no mas)
+
+  :== E. WORKERS ==
+  guards.recaptureEscapedDinosaurs()
+  technicians.repairIfNeeded()
+  Registrar salarios como gasto;
+
+  if (step % monitoringInterval == 0?) then (si)
+    :== F. MONITOREO ==
+    ParkMonitor.displaySnapshot(state);
+    note right
+      5 metricas:
+      1. Turistas activos
+      2. Dinos en recinto
+      3. Energia (%)
+      4. Eventos activos
+      5. Vehiculos no disponibles
+    end note
+  else (no)
+  endif
+
+  :state.incrementStep();
+
+endwhile (no)
+
+:Imprimir resumen final;
+:db.close();
+
+stop
+
+@enduml

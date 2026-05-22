@@ -1,0 +1,268 @@
+@startuml Diagrama de Clases - Parque Turistico de Dinosaurios
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "com.axity.dinosaurpark.config" {
+    class ParkConfig <<Singleton>> {
+        - {static} instance : ParkConfig
+        - properties : Properties
+        - ParkConfig()
+        + {static} getInstance() : ParkConfig
+        + getInt(key, default) : int
+        + getDouble(key, default) : double
+        + getString(key, default) : String
+        + getTotalSteps() : int
+        + {static} resetForTesting() : void
+    }
+}
+
+package "com.axity.dinosaurpark.model" {
+    enum TouristStatus {
+        WAITING
+        IN_PARK
+        ATTACKED
+        EXITED
+    }
+
+    enum DinosaurStatus {
+        IN_ENCLOSURE
+        ESCAPED
+        RECAPTURED
+    }
+
+    enum VehicleStatus {
+        AVAILABLE
+        IN_USE
+        BROKEN
+    }
+
+    class Tourist {
+        - id : int
+        - name : String
+        - status : TouristStatus
+        - moneySpent : double
+        - visitedZones : List<String>
+        + spend(amount) : void
+        + recordVisit(zone) : void
+    }
+
+    abstract class Dinosaur {
+        - id : int
+        - name : String
+        - species : String
+        - status : DinosaurStatus
+        - feedingCostPerDay : double
+        + {abstract} getDiet() : String
+        + {abstract} getDangerLevel() : double
+        + escape() : void
+        + recapture() : void
+        + returnToEnclosure() : void
+    }
+
+    class CarnivoreDinosaur {
+        + getDiet() : "CARNIVORE"
+        + getDangerLevel() : 0.9
+    }
+
+    class HerbivoreDinosaur {
+        + getDiet() : "HERBIVORE"
+        + getDangerLevel() : 0.2
+    }
+
+    abstract class Worker {
+        - id : int
+        - name : String
+        - dailySalary : double
+        + {abstract} getRole() : String
+    }
+
+    class Guard {
+        + getRole() : "GUARD"
+        + recaptureEscapedDinosaurs(dinos) : void
+    }
+
+    class Technician {
+        + getRole() : "TECHNICIAN"
+        + repairIfNeeded(operational, vehicles) : boolean
+    }
+
+    class Ticket {
+        - id : long
+        - touristId : int
+        - price : double
+        - category : String
+        - issuedAt : LocalDateTime
+    }
+
+    class Vehicle {
+        - id : int
+        - status : VehicleStatus
+        - repairSteps : int
+        - repairCountdown : int
+        + use() : void
+        + free() : void
+        + markBroken() : void
+        + tick() : void
+    }
+
+    Dinosaur <|-- CarnivoreDinosaur
+    Dinosaur <|-- HerbivoreDinosaur
+    Worker <|-- Guard
+    Worker <|-- Technician
+    Tourist --> TouristStatus
+    Dinosaur --> DinosaurStatus
+    Vehicle --> VehicleStatus
+}
+
+package "com.axity.dinosaurpark.zone" {
+    interface ParkZone {
+        + getName() : String
+        + hasCapacity() : boolean
+        + getCurrentOccupancy() : int
+        + getMaxCapacity() : int
+        + enter(tourist) : void
+        + exit(tourist) : void
+    }
+
+    enum ExperienceType {
+        BASIC(1,3)
+        PREMIUM(2,4)
+        VIP(3,5)
+    }
+
+    class ArrivalZone {
+        + addToQueue(tourist) : void
+        + processBatch(batchSize, db) : List<Ticket>
+    }
+
+    class CentralHub {
+        + visit(tourist, rng, db, discount) : void
+    }
+
+    class BathroomZone {
+        + tryEnter(tourist, rng, db, discount) : boolean
+        + tick() : void
+    }
+
+    class PowerPlant {
+        + tick(rng, db) : void
+        + triggerFailure(db) : void
+        + repair() : void
+        + isOperational() : boolean
+        + getEnergyPercentage() : double
+    }
+
+    class ObservationEnclosure {
+        + visit(tourist, rng, db, discount) : boolean
+        + conductSurvey(tourist, rng) : int
+    }
+
+    ParkZone <|.. ArrivalZone
+    ParkZone <|.. CentralHub
+    ParkZone <|.. BathroomZone
+    ParkZone <|.. PowerPlant
+    ParkZone <|.. ObservationEnclosure
+    ObservationEnclosure --> ExperienceType
+}
+
+package "com.axity.dinosaurpark.persistence" {
+    record RevenueRecord {
+        id : long
+        type : String
+        amount : double
+        touristId : int
+        zone : String
+        timestamp : LocalDateTime
+    }
+
+    record ExpenseRecord {
+        id : long
+        type : String
+        amount : double
+        description : String
+        timestamp : LocalDateTime
+    }
+
+    record EventRecord {
+        step : long
+        eventName : String
+        description : String
+        affectedEntities : String
+        timestamp : LocalDateTime
+    }
+
+    class DatabaseService {
+        - connection : Connection
+        - dbPath : String
+        + appendRevenue(record) : void
+        + appendExpense(record) : void
+        + appendEvent(record) : void
+        + close() : void
+    }
+}
+
+package "com.axity.dinosaurpark.event" {
+    interface SimulationEvent <<Strategy>> {
+        + getName() : String
+        + getDescription() : String
+        + getProbability() : double
+        + execute(state, rng) : void
+        + toRecord(step) : EventRecord
+    }
+
+    class DinosaurEscapeEvent
+    class BlackoutEvent
+    class StormEvent
+    class DealsHourEvent
+    class VehicleFailureEvent
+
+    SimulationEvent <|.. DinosaurEscapeEvent
+    SimulationEvent <|.. BlackoutEvent
+    SimulationEvent <|.. StormEvent
+    SimulationEvent <|.. DealsHourEvent
+    SimulationEvent <|.. VehicleFailureEvent
+}
+
+package "com.axity.dinosaurpark.simulation" {
+    class ParkState {
+        - tourists : List<Tourist>
+        - dinosaurs : List<Dinosaur>
+        - vehicles : List<Vehicle>
+        - activeEventNames : List<String>
+        - totalRevenue : double
+        - totalExpenses : double
+        - dealsHourActive : boolean
+        - currentDiscount : double
+        + clearActiveEvents() : void
+        + addActiveEvent(name) : void
+        + countActiveTourists() : int
+        + countDinosaursInEnclosure() : int
+        + countVehiclesInUse() : int
+    }
+
+    class SimulationEngine {
+        - allEvents : List<SimulationEvent>
+        - totalSteps : int
+        - monitoringInterval : int
+        + run() : void
+        - moveTourists() : void
+        - checkAndFireEvents() : void
+        - processWorkers() : void
+    }
+}
+
+package "com.axity.dinosaurpark.monitoring" {
+    class ParkMonitor {
+        + {static} displaySnapshot(state) : void
+    }
+}
+
+SimulationEngine --> ParkState
+SimulationEngine --> ParkConfig
+SimulationEngine --> SimulationEvent
+SimulationEngine --> ParkMonitor
+ParkState --> DatabaseService
+ParkState --> PowerPlant
+
+@enduml

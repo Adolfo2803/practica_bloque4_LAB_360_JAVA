@@ -1,0 +1,73 @@
+@startuml Secuencia de Eventos - Patron Strategy
+
+participant "SimulationEngine" as Engine
+participant "ParkState" as State
+participant "Random" as Rng
+participant "SimulationEvent" as Event
+participant "DatabaseService" as DB
+
+== Inicio de cada Step ==
+
+Engine -> State : clearActiveEvents()
+note right: Limpia lista de eventos\ny resetea descuento a 0.0
+
+== checkAndFireEvents() ==
+
+loop por cada evento en allEvents
+    Engine -> Rng : nextDouble()
+    Rng --> Engine : valor
+
+    alt valor < event.getProbability()
+
+        alt DinosaurEscapeEvent (prob=0.05)
+            Engine -> Event : execute(state, rng)
+            Event -> State : getDinosaurs()
+            Event -> Event : elegir dino IN_ENCLOSURE al azar
+            Event -> Event : dino.escape()
+            alt rng < dangerLevel
+                Event -> State : getTourists()
+                Event -> Event : turista.setStatus(ATTACKED)
+            end
+            Event -> DB : appendEvent(record)
+        end
+
+        alt BlackoutEvent (prob=0.03)
+            Engine -> Event : execute(state, rng)
+            Event -> State : getPowerPlant()
+            Event -> Event : plant.triggerFailure(db)
+            Event -> State : addExpense(2000)
+            Event -> DB : appendExpense(record)
+            Event -> DB : appendEvent(record)
+        end
+
+        alt StormEvent (prob=0.04)
+            Engine -> Event : execute(state, rng)
+            Event -> State : getTourists()
+            loop turistas IN_PARK
+                Event -> Event : tourist.recordVisit("Evacuacion")
+            end
+            Event -> State : addExpense(500)
+            Event -> DB : appendExpense(record)
+            Event -> DB : appendEvent(record)
+        end
+
+        alt DealsHourEvent (prob=0.08)
+            Engine -> Event : execute(state, rng)
+            Event -> State : setDealsHourActive(true)
+            Event -> State : setCurrentDiscount(0.30)
+            Event -> DB : appendEvent(record)
+        end
+
+        alt VehicleFailureEvent (prob=0.06)
+            Engine -> Event : execute(state, rng)
+            Event -> State : getVehicles()
+            Event -> Event : elegir vehiculo AVAILABLE al azar
+            Event -> Event : vehicle.markBroken()
+            Event -> DB : appendEvent(record)
+        end
+
+        Engine -> State : addActiveEvent(event.getName())
+    end
+end
+
+@enduml

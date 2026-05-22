@@ -68,7 +68,7 @@ Ejemplo de propiedades:
 
 ```properties
 tourists=50
-dinosaurs.carnivores=20
+dinosaurs.carnivores=5
 dinosaurs.herbivores=15
 vehicles.count=4
 vehicles.repairSteps=5
@@ -169,8 +169,8 @@ Los changelogs de Liquibase están en `src/main/resources/db/changelog/`. Todo a
 
 ## 🧪 Pruebas y cobertura
 
-- Pruebas unitarias con **JUnit 5** y **Mockito** (para verificar interacciones, p. ej. que un evento invoque a la planta de energía).
-- **JaCoCo** valida una cobertura **mínima del 65%**: si no se alcanza, `mvn test` falla con `BUILD FAILURE` aunque todos los tests pasen.
+- **121 pruebas unitarias** con **JUnit 5** y **Mockito** (para verificar interacciones, p. ej. que un evento invoque a la planta de energía).
+- **JaCoCo** valida una cobertura **mínima del 65%**: si no se alcanza, `mvn test` falla con `BUILD FAILURE` aunque todos los tests pasen. Cobertura actual: **97.8%**.
 - Las pruebas que requieren base de datos usan una instancia aislada por test (nombre único) para no interferir entre sí.
 
 ```bash
