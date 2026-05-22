@@ -19,6 +19,22 @@ notas-claude/
 docs/claude/
 
 # ==========================================================
+#  Documentos de instrucciones del laboratorio  -> NO SUBIR
+#  (material de referencia del tutor / enunciado oficial)
+#  OJO: NO ignoramos README.md (ese SI es el README oficial del proyecto)
+# ==========================================================
+# README del tutor (cualquier variante: README__3_.md, README_tutor.md, etc.)
+README_*.md
+README__*.md
+README-*.md
+README\ *.md
+README*tutor*.md
+# Enunciado oficial y cualquier PDF de instrucciones
+*.pdf
+Laboratorio*.pdf
+Laboratorio*.md
+
+# ==========================================================
 #  Java / Maven
 # ==========================================================
 target/
