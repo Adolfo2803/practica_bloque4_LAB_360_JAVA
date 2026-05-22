@@ -1,0 +1,57 @@
+# ==========================================================
+#  Archivos que evidencian el uso de Claude Code  -> IGNORAR
+# ==========================================================
+# Carpeta de configuración local de Claude Code
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+
+# Cualquier MD relacionado con prompts / sesiones / notas de Claude Code
+# (patrones amplios para no dejar rastro en el repo)
+*claude*.md
+*CLAUDE*.md
+PROMPT*.md
+prompt*.md
+*.claude.md
+.aider*
+.cursor/
+notas-claude/
+docs/claude/
+
+# ==========================================================
+#  Java / Maven
+# ==========================================================
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+*.log
+
+# Maven wrapper (opcional, descomenta si no lo versionas)
+# .mvn/
+# mvnw
+# mvnw.cmd
+
+# ==========================================================
+#  Base de datos H2 (datos generados en runtime)
+# ==========================================================
+data/
+*.mv.db
+*.trace.db
+
+# Salidas CSV (si llegaran a generarse)
+output/
+
+# ==========================================================
+#  IDEs y sistema operativo
+# ==========================================================
+.idea/
+.vscode/
+.settings/
+.classpath
+.project
+*.swp
+.DS_Store
+Thumbs.db
