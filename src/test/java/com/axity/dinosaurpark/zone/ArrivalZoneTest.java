@@ -62,4 +62,24 @@ class ArrivalZoneTest {
     void getName_returnsCorrectName() {
         assertEquals("Zona de Llegada", arrivalZone.getName());
     }
+
+    @Test
+    void enter_addsTouristToQueue() {
+        Tourist tourist = new Tourist(1, "Ana");
+        arrivalZone.enter(tourist);
+        assertEquals(1, arrivalZone.getCurrentOccupancy());
+    }
+
+    @Test
+    void exit_removesTouristFromQueue() {
+        Tourist tourist = new Tourist(1, "Ana");
+        arrivalZone.addToQueue(tourist);
+        arrivalZone.exit(tourist);
+        assertEquals(0, arrivalZone.getCurrentOccupancy());
+    }
+
+    @Test
+    void getMaxCapacity_returnsConfiguredValue() {
+        assertEquals(30, arrivalZone.getMaxCapacity());
+    }
 }

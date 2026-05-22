@@ -77,4 +77,29 @@ class CentralHubTest {
     void hasCapacity_alwaysTrue() {
         assertTrue(hub.hasCapacity());
     }
+
+    @Test
+    void enter_incrementsOccupancy() {
+        Tourist tourist = new Tourist(1, "Ana");
+        hub.enter(tourist);
+        assertEquals(1, hub.getCurrentOccupancy());
+    }
+
+    @Test
+    void exit_decrementsOccupancy() {
+        Tourist tourist = new Tourist(1, "Ana");
+        hub.enter(tourist);
+        hub.exit(tourist);
+        assertEquals(0, hub.getCurrentOccupancy());
+    }
+
+    @Test
+    void getMaxCapacity_returnsMaxInt() {
+        assertEquals(Integer.MAX_VALUE, hub.getMaxCapacity());
+    }
+
+    @Test
+    void getName_returnsCorrectName() {
+        assertEquals("Hub Central", hub.getName());
+    }
 }

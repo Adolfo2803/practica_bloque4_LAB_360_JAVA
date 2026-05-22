@@ -92,4 +92,43 @@ class ObservationEnclosureTest {
         assertEquals("Recinto Basico", basicEnclosure.getName());
         assertEquals("Recinto VIP", vipEnclosure.getName());
     }
+
+    @Test
+    void getMaxCapacity_returnsConfiguredValue() {
+        assertEquals(20, basicEnclosure.getMaxCapacity());
+        assertEquals(5, vipEnclosure.getMaxCapacity());
+    }
+
+    @Test
+    void getExperienceType_returnsCorrectType() {
+        assertEquals(ExperienceType.BASIC, basicEnclosure.getExperienceType());
+        assertEquals(ExperienceType.VIP, vipEnclosure.getExperienceType());
+    }
+
+    @Test
+    void getEntryFee_returnsConfiguredValue() {
+        assertEquals(10.0, basicEnclosure.getEntryFee());
+        assertEquals(75.0, vipEnclosure.getEntryFee());
+    }
+
+    @Test
+    void exit_removesVisitor() {
+        Tourist tourist = new Tourist(1, "Ana");
+        basicEnclosure.enter(tourist);
+        assertEquals(1, basicEnclosure.getCurrentOccupancy());
+        basicEnclosure.exit(tourist);
+        assertEquals(0, basicEnclosure.getCurrentOccupancy());
+    }
+
+    @Test
+    void conductSurvey_premiumReturnsCorrectRange() {
+        ObservationEnclosure premium = new ObservationEnclosure("Premium", ExperienceType.PREMIUM, 12, 30.0);
+        Tourist tourist = new Tourist(1, "Ana");
+        Random rng = new Random(42);
+
+        for (int i = 0; i < 100; i++) {
+            int score = premium.conductSurvey(tourist, rng);
+            assertTrue(score >= 2 && score <= 4);
+        }
+    }
 }

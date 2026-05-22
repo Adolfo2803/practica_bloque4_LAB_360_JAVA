@@ -75,4 +75,35 @@ class PowerPlantTest {
     void getName_returnsCorrectName() {
         assertEquals("Planta de Energia", plant.getName());
     }
+
+    @Test
+    void hasCapacity_alwaysFalse() {
+        assertFalse(plant.hasCapacity());
+    }
+
+    @Test
+    void getMaxCapacity_returnsZero() {
+        assertEquals(0, plant.getMaxCapacity());
+    }
+
+    @Test
+    void getCurrentOccupancy_returnsZero() {
+        assertEquals(0, plant.getCurrentOccupancy());
+    }
+
+    @Test
+    void getEnergyPercentage_returnsCurrentEnergy() {
+        assertEquals(100.0, plant.getEnergyPercentage());
+    }
+
+    @Test
+    void tick_energyDoesNotGoBelowZero() {
+        PowerPlant lowPlant = new PowerPlant(1.0, 5.0, 0.0, 200, 500);
+        Random rng = Mockito.mock(Random.class);
+        when(rng.nextDouble()).thenReturn(0.9);
+
+        lowPlant.tick(rng, db);
+
+        assertEquals(0.0, lowPlant.getEnergy());
+    }
 }

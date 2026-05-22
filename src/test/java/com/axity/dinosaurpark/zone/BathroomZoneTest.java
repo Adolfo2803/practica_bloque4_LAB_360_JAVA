@@ -86,4 +86,36 @@ class BathroomZoneTest {
     void getName_returnsCorrectName() {
         assertEquals("Banos", bathroom.getName());
     }
+
+    @Test
+    void enter_addsSlot() {
+        Tourist tourist = new Tourist(1, "Ana");
+        bathroom.enter(tourist);
+        assertEquals(1, bathroom.getCurrentOccupancy());
+    }
+
+    @Test
+    void exit_removesSlot() {
+        Tourist tourist = new Tourist(1, "Ana");
+        bathroom.enter(tourist);
+        bathroom.exit(tourist);
+        assertEquals(0, bathroom.getCurrentOccupancy());
+    }
+
+    @Test
+    void getMaxCapacity_returnsConfiguredValue() {
+        assertEquals(10, bathroom.getMaxCapacity());
+    }
+
+    @Test
+    void tryEnter_appliesDiscount() {
+        Tourist tourist = new Tourist(1, "Ana");
+        tourist.setStatus(TouristStatus.IN_PARK);
+        Random rng = Mockito.mock(Random.class);
+        when(rng.nextDouble()).thenReturn(0.1);
+
+        bathroom.tryEnter(tourist, rng, db, 0.30);
+
+        assertEquals(14.0, tourist.getMoneySpent(), 0.01);
+    }
 }
